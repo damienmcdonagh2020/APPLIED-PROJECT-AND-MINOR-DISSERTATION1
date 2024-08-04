@@ -1,0 +1,16 @@
+ion-content {
+    --background: none; // Ensures the background doesn't interfere with our map
+  }
+  
+  .map-container {
+    width: 100%;
+    height: 100vh; // This will make it take the full height of the viewport
+  
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  
+  
+  
