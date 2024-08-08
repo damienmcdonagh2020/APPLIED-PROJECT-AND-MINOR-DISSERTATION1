@@ -82,15 +82,21 @@ private async addInteractiveMarker(lat: number, lng: number, locationName: strin
       let popupContent;
       if (data) {
         popupContent = `
-          <strong>${locationName}</strong><br>
-          Time: ${data[0]?.time || 'N/A'}<br>
-          Air Temperature: ${data[0]?.airTemperature ? data[0].airTemperature + '°C' : 'N/A'}<br>
-          Wave Height: ${data[0]?.waveHeight ? data[0].waveHeight + 'm' : 'N/A'}
+          <div class="popup-content">
+            <h4>${locationName}</h4>
+            <p class="popup-time"><i class="fas fa-clock"></i> ${data[0]?.time || 'N/A'}</p>
+            <p class="popup-temp"><i class="fas fa-thermometer-half"></i> 
+              ${data[0]?.airTemperature ? data[0].airTemperature + '°C' : 'N/A'}
+            </p>
+            <p class="popup-wave"><i class="fas fa-water"></i> 
+              ${data[0]?.waveHeight ? data[0].waveHeight + 'm' : 'N/A'}
+            </p>
+          </div>
         `;
       } else {
         popupContent = `No data available for ${locationName}`;
       }
-      e.target.bindPopup(popupContent).openPopup();
+      e.target.bindPopup(popupContent, { className: 'custom-popup' }).openPopup();
     });
 
   if (this.map) {
