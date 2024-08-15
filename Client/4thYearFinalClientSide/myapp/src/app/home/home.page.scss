@@ -25,3 +25,22 @@
 #container a {
   text-decoration: none;
 }
+
+ion-card {
+  img {
+    width: 100%;
+    height: auto;
+  }
+
+  ion-card-title {
+    font-size: 1.5rem;
+  }
+
+  ion-card-subtitle {
+    color: var(--ion-color-primary);
+  }
+
+  ion-card-content {
+    font-size: 0.9rem;
+  }
+}

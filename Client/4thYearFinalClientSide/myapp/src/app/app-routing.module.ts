@@ -19,7 +19,11 @@ const routes: Routes = [
   {
     path: 'ireland-map',
     loadChildren: () => import('./ireland-map/ireland-map.module').then( m => m.IrelandMapPageModule)
+  },  {
+    path: 'shop',
+    loadChildren: () => import('./shop/shop.module').then( m => m.ShopPageModule)
   },
+
 ];
 
 @NgModule({
