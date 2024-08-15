@@ -1,6 +1,6 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>Shop</ion-title>
+    <ion-title>Wetsuit Shop</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -18,12 +18,12 @@
             <p>{{wetsuit.description}}</p>
             <ion-item>
               <ion-label>Size</ion-label>
-              <ion-select placeholder="Select Size">
+              <ion-select placeholder="Select Size" (ionChange)="onSizeSelected(wetsuit.name, $event.detail.value)">
                 <ion-select-option *ngFor="let size of wetsuit.size">{{size}}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-card-content>
-          <ion-button expand="full" color="primary">Add to Cart</ion-button>
+          <ion-button expand="full" color="primary" (click)="addToCart(wetsuit)">Add to Cart</ion-button>
         </ion-card>
       </ion-col>
     </ion-row>

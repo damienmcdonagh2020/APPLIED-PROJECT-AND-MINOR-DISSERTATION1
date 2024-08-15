@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CartService } from '../cart.service'; // Import the CartService
 
 @Component({
   selector: 'app-shop',
@@ -7,8 +8,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ShopPage implements OnInit {
   wetsuits: Array<{ name: string, size: string[], price: number, image: string, description: string }> = [];
+  selectedSize: { [key: string]: string } = {}; // Store selected sizes by product name or another unique identifier
 
-  constructor() { }
+  constructor(private cartService: CartService) { } // Inject the CartService
 
   ngOnInit() {
     this.wetsuits = [
@@ -29,5 +31,21 @@ export class ShopPage implements OnInit {
       // Add more wetsuits here
     ];
   }
-}
 
+  onSizeSelected(wetsuitName: string, size: string) {
+    this.selectedSize[wetsuitName] = size; // Store the selected size for this wetsuit
+  }
+
+  addToCart(wetsuit: { name: string, size: string[], price: number, image: string, description: string }): void {
+    const size = this.selectedSize[wetsuit.name];
+    
+    if (!size) {
+      alert('Please select a size before adding to cart.');
+      return;
+    }
+
+    // Add the selected size to the product object before adding it to the cart
+    this.cartService.addToCart({ ...wetsuit, selectedSize: size });
+    alert(`${wetsuit.name} (${size}) added to cart!`); // Provide feedback to the user
+  }
+}

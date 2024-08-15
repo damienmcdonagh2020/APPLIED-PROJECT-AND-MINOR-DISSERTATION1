@@ -7,6 +7,7 @@ interface Product {
   price: number;
   image: string;
   description: string;
+  selectedSize?: string; // Add selectedSize as an optional property
 }
 
 @Injectable({
@@ -14,21 +15,20 @@ interface Product {
 })
 
 export class CartService {
-  private cart: Product[] = []; // Specify the type of the cart array
+  private cart: Product[] = []; // Using Product interface
 
   constructor() { }
 
-  addToCart(product: Product): void { // Specify the type of the product parameter
+  addToCart(product: Product): void {
     this.cart.push(product);
   }
 
-  getCart(): Product[] { // Specify the return type
+  getCart(): Product[] {
     return this.cart;
   }
 
-  clearCart(): Product[] { // Specify the return type
+  clearCart(): Product[] {
     this.cart = [];
     return this.cart;
   }
 }
-

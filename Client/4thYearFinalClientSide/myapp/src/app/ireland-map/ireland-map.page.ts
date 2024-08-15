@@ -98,10 +98,11 @@ export class IrelandMapPage implements AfterViewInit {
 
     // Add Cloud Layer
     const cloudLayer = L.tileLayer(
-      `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=YOUR_API_KEY`, 
+      `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=107846452952c901f52eb0bb51f0381a`, 
       { opacity: 0.7 }
     );
     cloudLayer.addTo(this.map);
+
 
     this.addInteractiveMarker(54.2132, -9.0909, "Enniscrone");
     this.addInteractiveMarker(52.9360, -9.4684, "Lahinch");
