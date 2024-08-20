@@ -9,7 +9,10 @@ import { GraphqlService } from '../graphql.service';
 })
 export class IrelandMapPage implements AfterViewInit {
   private map: L.Map | undefined;
-  private selectedInterval: string = '00:00-06:00'; // Default interval
+  private selectedInterval: string = '12:00-18:00'; // Default interval
+  private currentMarker: L.Marker | undefined;
+  private currentLocationName: string = '';
+  private currentData: any;
 
   constructor(private graphqlService: GraphqlService) { }
 
@@ -103,7 +106,7 @@ export class IrelandMapPage implements AfterViewInit {
     );
     cloudLayer.addTo(this.map);
 
-
+    // Add the markers for different locations
     this.addInteractiveMarker(54.2132, -9.0909, "Enniscrone");
     this.addInteractiveMarker(52.9360, -9.4684, "Lahinch");
     this.addInteractiveMarker(54.2692, -8.5989, "Strandhill");
@@ -115,53 +118,87 @@ export class IrelandMapPage implements AfterViewInit {
     this.addInteractiveMarker(54.4655, -8.4495, "Mullaghmore");
   }
 
-private async addInteractiveMarker(lat: number, lng: number, locationName: string) {
-  const marker = L.marker([lat, lng])
-    .on('click', async (e) => {
-      console.log(`${locationName} marker clicked!`);
-      const data = await this.getSurfDetails(lat, lng);
-      let popupContent = '';
+  private async addInteractiveMarker(lat: number, lng: number, locationName: string) {
+    const marker = L.marker([lat, lng])
+      .on('click', async () => {
+        console.log(`${locationName} marker clicked!`);
+        const data = await this.getSurfDetails(lat, lng);
+        this.selectedInterval = '12:00-18:00'; // Resetting to the default interval
 
-      if (data && data[this.selectedInterval]) {
-        const intervalData = data[this.selectedInterval][0]; // Taking the first record in the interval as an example
-        popupContent += `
-          <div class="popup-content">
-            <h4>${locationName}</h4>
-            <p class="popup-interval"><strong>${this.selectedInterval}:</strong></p>
-            <p class="popup-temp"><i class="fas fa-thermometer-half"></i> <strong>Temperature:</strong>
-              ${intervalData?.airTemperature ? intervalData.airTemperature + '°C' : 'N/A'}
-            </p>
-            <p class="popup-wave"><i class="fas fa-water"></i> <strong>Wave Height:</strong> 
-              ${intervalData?.waveHeight ? intervalData.waveHeight + 'm' : 'N/A'}
-            </p>
-            <p class="popup-direction"><i class="fas fa-direction"></i> <strong>Wave Direction:</strong>
-              ${intervalData?.waveDirection ? intervalData.waveDirection + '°' : 'N/A'}
-            </p>
-            <p class="popup-speed"><i class="fas fa-wind"></i> <strong>Wind Speed:</strong> 
-              ${intervalData?.windSpeed ? intervalData.windSpeed + 'm/s' : 'N/A'}
-            </p>
-          </div>
-        `;
-      } else {
-        popupContent = `No data available for ${locationName}`;
+        this.currentMarker = marker;
+        this.currentLocationName = locationName;
+        this.currentData = data;
+
+        this.updatePopupContent(); // Initialize popup content
+      });
+
+    if (this.map) {
+      marker.addTo(this.map);
+    }
+  }
+
+  private updatePopupContent() {
+    if (!this.currentMarker || !this.currentData) return;
+
+    const popupContainer = document.createElement('div');
+    popupContainer.className = 'popup-content';
+
+    const titleElement = document.createElement('h4');
+    titleElement.innerText = this.currentLocationName;
+    popupContainer.appendChild(titleElement);
+
+    const labelElement = document.createElement('label');
+    labelElement.setAttribute('for', 'timeIntervalSelector');
+    labelElement.innerText = 'Select Time Interval:';
+    popupContainer.appendChild(labelElement);
+
+    const selectElement = document.createElement('select');
+    selectElement.id = 'timeIntervalSelector';
+    selectElement.addEventListener('change', (event: Event) => this.onIntervalChange(event));
+
+    const intervals = ['00:00-06:00', '06:00-12:00', '12:00-18:00', '18:00-00:00'];
+    intervals.forEach(interval => {
+      const option = document.createElement('option');
+      option.value = interval;
+      option.innerText = interval;
+      if (interval === this.selectedInterval) {
+        option.selected = true;
       }
-
-      // Close the existing popup (if any)
-      if (e.target.getPopup()) {
-        e.target.closePopup();
-      }
-
-      // Bind the new popup content
-      e.target.bindPopup(popupContent, { className: 'custom-popup' }).openPopup();
+      selectElement.appendChild(option);
     });
 
-  if (this.map) {
-    marker.addTo(this.map);
+    popupContainer.appendChild(selectElement);
+
+    // Display the data for the selected interval
+    const intervalData = this.currentData[this.selectedInterval]?.[0];
+    if (intervalData) {
+      const temperatureElement = document.createElement('p');
+      temperatureElement.innerHTML = `<strong>Temperature:</strong> ${intervalData.airTemperature ?? 'N/A'}°C`;
+      popupContainer.appendChild(temperatureElement);
+
+      const waveHeightElement = document.createElement('p');
+      waveHeightElement.innerHTML = `<strong>Wave Height:</strong> ${intervalData.waveHeight ?? 'N/A'}m`;
+      popupContainer.appendChild(waveHeightElement);
+
+      const waveDirectionElement = document.createElement('p');
+      waveDirectionElement.innerHTML = `<strong>Wave Direction:</strong> ${intervalData.waveDirection ?? 'N/A'}°`;
+      popupContainer.appendChild(waveDirectionElement);
+
+      const windSpeedElement = document.createElement('p');
+      windSpeedElement.innerHTML = `<strong>Wind Speed:</strong> ${intervalData.windSpeed ?? 'N/A'}m/s`;
+      popupContainer.appendChild(windSpeedElement);
+    } else {
+      const noDataElement = document.createElement('p');
+      noDataElement.innerText = 'No data available for selected interval.';
+      popupContainer.appendChild(noDataElement);
+    }
+
+    this.currentMarker.bindPopup(popupContainer).openPopup();
   }
-}
 
-
-  onIntervalChange(event: any) {
-    this.selectedInterval = event.target.value;
+  onIntervalChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    this.selectedInterval = target.value;
+    this.updatePopupContent(); // Update popup content when interval changes
   }
 }
