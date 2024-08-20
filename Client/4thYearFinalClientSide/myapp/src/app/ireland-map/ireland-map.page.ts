@@ -13,6 +13,7 @@ export class IrelandMapPage implements AfterViewInit {
   private currentMarker: L.Marker | undefined;
   private currentLocationName: string = '';
   private currentData: any;
+  private currentTideData: any;  // Add this line to store tide data
 
   constructor(private graphqlService: GraphqlService) { }
 
@@ -23,6 +24,26 @@ export class IrelandMapPage implements AfterViewInit {
         this.map.invalidateSize();
       }
     }, 200);    
+  }
+
+  private async getTideData(lat: number, lng: number): Promise<any> {
+    const query = `
+      query GetTides($lat: Float!, $lng: Float!) {
+        getTideData(lat: $lat, lng: $lng) {
+          time
+          height
+          type
+        }
+      }
+    `;
+  
+    try {
+      const response = await this.graphqlService.fetchData({ query, variables: { lat, lng } }).toPromise();
+      return response.data.getTideData;
+    } catch (error) {
+      console.error('Error fetching tide data:', error);
+      throw new Error('Failed to fetch tide data.');
+    }
   }
 
   async getSurfDetails(lat: number, lng: number): Promise<any> {
@@ -122,13 +143,28 @@ export class IrelandMapPage implements AfterViewInit {
     const marker = L.marker([lat, lng])
       .on('click', async () => {
         console.log(`${locationName} marker clicked!`);
-        const data = await this.getSurfDetails(lat, lng);
-        this.selectedInterval = '12:00-18:00'; // Resetting to the default interval
 
-        this.currentMarker = marker;
-        this.currentLocationName = locationName;
-        this.currentData = data;
+        try {
 
+          const data = await this.getSurfDetails(lat, lng);
+          this.selectedInterval = '12:00-18:00'; // Resetting to the default interval
+          // Fetch weather data
+          const weatherData = await this.getSurfDetails(lat, lng);
+        
+          // Fetch tide data
+          const tideData = await this.getTideData(lat, lng);
+        
+          // Store fetched data for later use
+          this.currentMarker = marker;
+          this.currentLocationName = locationName;
+          this.currentData = weatherData;
+          this.currentTideData = tideData;
+        
+          // Update popup content
+          this.updatePopupContent();
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
         this.updatePopupContent(); // Initialize popup content
       });
 

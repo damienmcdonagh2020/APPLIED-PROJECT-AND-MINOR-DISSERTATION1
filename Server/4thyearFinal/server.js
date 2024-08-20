@@ -21,8 +21,15 @@ const schema = buildSchema(`
     secondarySwellHeight: Float
   }
 
+  type TideData {
+    time: String
+    height: Float
+    type: String
+  }
+
   type Query {  
     getWeatherData(lat: Float!, lng: Float!, params: String!): [WeatherData]
+    getTideData(lat: Float!, lng: float!): [TideData]
   }
 `);
 
@@ -59,6 +66,28 @@ const root = {
     } catch (error) {
       console.error('Error response:', error.response.data); 
       throw new Error("Failed to fetch weather data.");
+    }
+  },
+
+  getTideData: async ({ lat, lng }) => {
+    try {
+      const response = await axios.get('https://www.worldtides.info/api/v2', {
+        params: {
+          lat: lat,
+          lon: lng,
+          key: '9a287ea2-3c7c-4c3b-a65b-c7847a1f97f3'  // Replace with your actual WorldTides API key
+        }
+      });
+
+      // Extract and return the tide data as required by your GraphQL schema
+      return response.data.extremes.map(tide => ({
+        time: tide.date,
+        height: tide.height,
+        type: tide.type // High or Low tide
+      }));
+    } catch (error) {
+      console.error('Error response:', error.response.data);
+      throw new Error("Failed to fetch tide data.");
     }
   }
 };
