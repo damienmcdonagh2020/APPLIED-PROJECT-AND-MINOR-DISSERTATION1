@@ -1,10 +1,11 @@
-//Dependencies And MiddleWare
+//Dependencies And Middleware
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
 const axios = require('axios');
-const cors = require('cors');  
+const cors = require('cors');
 
+// Define GraphQL schema
 const schema = buildSchema(`
   type WeatherData {
     time: String
@@ -29,7 +30,7 @@ const schema = buildSchema(`
 
   type Query {  
     getWeatherData(lat: Float!, lng: Float!, params: String!): [WeatherData]
-    getTideData(lat: Float!, lng: float!): [TideData]
+    getTideData(lat: Float!, lng: Float!): [TideData]
   }
 `);
 
@@ -41,7 +42,7 @@ const root = {
         params: {
           lat: lat,
           lng: lng,
-          params: 'airTemperature,waveHeight,waterTemperature,wavePeriod,waveDirection,swellDirection,swellHeight,windDirection,windSpeed,secondarySwellDirection,secondarySwellHeight'
+          params: params  // Adjusted to use provided params
         },
         headers: {
           'Authorization': '1baca720-772c-11ee-92e6-0242ac130002-1baca784-772c-11ee-92e6-0242ac130002'  // Replace with your actual API key
@@ -71,14 +72,17 @@ const root = {
 
   getTideData: async ({ lat, lng }) => {
     try {
-      const response = await axios.get('https://www.worldtides.info/api/v2', {
+      const response = await axios.get('https://www.worldtides.info/api/v3', {
         params: {
           lat: lat,
           lon: lng,
-          key: '9a287ea2-3c7c-4c3b-a65b-c7847a1f97f3'  // Replace with your actual WorldTides API key
+          key: '9a287ea2-3c7c-4c3b-a65b-c7847a1f97f3',  // Replace with your actual WorldTides API key
+          extremes: '',  // Specify 'extremes' to fetch high and low tide data
+          date: 'today', // Optional: specify the date to retrieve data for; 'today' can be used for current date
+          days: 1       // Optional: specify the number of days to retrieve; defaults to 1 if omitted
         }
       });
-
+  
       // Extract and return the tide data as required by your GraphQL schema
       return response.data.extremes.map(tide => ({
         time: tide.date,
@@ -90,22 +94,28 @@ const root = {
       throw new Error("Failed to fetch tide data.");
     }
   }
+  
 };
 
+// Initialize the Express application
 const app = express();
 
+// Enable CORS for all routes
 app.use(cors({
   origin: 'http://localhost:8100', 
   methods: ['GET', 'POST'], 
   allowedHeaders: ['Content-Type', 'Authorization'] 
 }));
-// Enable GraphiQL interface for easier querying
+
+// Setup the /graphql endpoint with GraphQL HTTP middleware
 app.use('/graphql', graphqlHTTP({
   schema: schema,
   rootValue: root,
-  graphiql: true, 
+  graphiql: true, // Enable GraphiQL interface for easier querying
 }));
 
+// Start the server
 app.listen(4000, () => {
   console.log('Running a GraphQL API server at http://localhost:4000/graphql');
 });
+
