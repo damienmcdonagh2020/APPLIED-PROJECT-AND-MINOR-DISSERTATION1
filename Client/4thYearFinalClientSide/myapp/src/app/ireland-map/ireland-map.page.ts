@@ -251,6 +251,14 @@ export class IrelandMapPage implements AfterViewInit {
         });
     }
 
+    // Add a link to the display page with coordinates
+    const linkElement = document.createElement('a');
+    linkElement.href = `/data-display?lat=${this.currentMarker?.getLatLng().lat}&lng=${this.currentMarker?.getLatLng().lng}`;
+    linkElement.innerText = 'View Detailed Chart';
+    linkElement.style.display = 'block';
+    linkElement.style.marginTop = '10px';
+    popupContainer.appendChild(linkElement);
+
     this.currentMarker.bindPopup(popupContainer).openPopup();
   }
 
