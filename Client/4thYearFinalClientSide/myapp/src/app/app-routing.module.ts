@@ -23,6 +23,10 @@ const routes: Routes = [
     path: 'shop',
     loadChildren: () => import('./shop/shop.module').then( m => m.ShopPageModule)
   },
+  {
+    path: 'data-display',
+    loadChildren: () => import('./data-display/data-display.module').then( m => m.DataDisplayPageModule)
+  },
 
 ];
 

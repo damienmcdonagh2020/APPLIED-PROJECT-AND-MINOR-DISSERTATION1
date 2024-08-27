@@ -13,7 +13,7 @@ export class IrelandMapPage implements AfterViewInit {
   private currentMarker: L.Marker | undefined;
   private currentLocationName: string = '';
   private currentData: any;
-  private currentTideData: any;  // Add this line to store tide data
+  private currentTideData: any;
 
   constructor(private graphqlService: GraphqlService) { }
 
@@ -46,7 +46,7 @@ export class IrelandMapPage implements AfterViewInit {
     }
   }
 
-  async getSurfDetails(lat: number, lng: number): Promise<any> {
+  private async getSurfDetails(lat: number, lng: number): Promise<any> {
     const query = `
       query GetWeather($lat: Float!, $lng: Float!) {
         getWeatherData(lat: $lat, lng: $lng, params: "airTemperature,waveHeight,waveDirection,windSpeed") {
@@ -59,13 +59,14 @@ export class IrelandMapPage implements AfterViewInit {
       }
     `;
 
-    return new Promise((resolve, reject) => {
-      this.graphqlService.fetchData({ query: query, variables: { lat, lng } }).subscribe(response => {
-        const weatherData = response.data.getWeatherData;
-        const groupedData = this.groupByTimeInterval(weatherData);
-        resolve(groupedData);
-      }, reject);
-    });
+    try {
+      const response = await this.graphqlService.fetchData({ query, variables: { lat, lng } }).toPromise();
+      const weatherData = response.data.getWeatherData;
+      return this.groupByTimeInterval(weatherData);
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      throw new Error('Failed to fetch weather data.');
+    }
   }
 
   private groupByTimeInterval(data: any[]) {
@@ -108,8 +109,7 @@ export class IrelandMapPage implements AfterViewInit {
     });
 
     return intervals;
-}
-
+  }
 
   private loadMap() {
     const defaultIcon = L.icon({
@@ -156,11 +156,9 @@ export class IrelandMapPage implements AfterViewInit {
         console.log(`${locationName} marker clicked!`);
 
         try {
-
-          const data = await this.getSurfDetails(lat, lng);
-          this.selectedInterval = '12:00-18:00'; // Resetting to the default interval
           // Fetch weather data
           const weatherData = await this.getSurfDetails(lat, lng);
+          this.selectedInterval = '12:00-18:00'; // Resetting to the default interval
         
           // Fetch tide data
           const tideData = await this.getTideData(lat, lng);
@@ -177,16 +175,12 @@ export class IrelandMapPage implements AfterViewInit {
         } catch (error) {
           console.error('Error fetching data:', error);
         }
-        this.updatePopupContent(); // Initialize popup content
       });
 
     if (this.map) {
       marker.addTo(this.map);
     }
   }
-
-
-
 
   private updatePopupContent() {
     if (!this.currentMarker || !this.currentData) return;
@@ -258,9 +252,7 @@ export class IrelandMapPage implements AfterViewInit {
     }
 
     this.currentMarker.bindPopup(popupContainer).openPopup();
-    
-}
-
+  }
 
   onIntervalChange(event: Event) {
     const target = event.target as HTMLSelectElement;
