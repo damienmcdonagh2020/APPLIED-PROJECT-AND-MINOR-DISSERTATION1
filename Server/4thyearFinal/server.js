@@ -42,10 +42,10 @@ const root = {
         params: {
           lat: lat,
           lng: lng,
-          params: params  // Adjusted to use provided params
+          params: params  
         },
         headers: {
-          'Authorization': '1baca720-772c-11ee-92e6-0242ac130002-1baca784-772c-11ee-92e6-0242ac130002'  // Replace with your actual API key
+          'Authorization': '1baca720-772c-11ee-92e6-0242ac130002-1baca784-772c-11ee-92e6-0242ac130002' 
         }
       });
       
@@ -76,7 +76,7 @@ const root = {
         params: {
           lat: lat,
           lon: lng,
-          key: '9a287ea2-3c7c-4c3b-a65b-c7847a1f97f3',  // Replace with your actual WorldTides API key
+          key: '9a287ea2-3c7c-4c3b-a65b-c7847a1f97f3', 
           extremes: '',  // Specify 'extremes' to fetch high and low tide data
           date: 'today', // Optional: specify the date to retrieve data for; 'today' can be used for current date
           days: 1       // Optional: specify the number of days to retrieve; defaults to 1 if omitted

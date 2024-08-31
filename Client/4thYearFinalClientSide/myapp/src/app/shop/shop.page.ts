@@ -28,7 +28,6 @@ export class ShopPage implements OnInit {
         image: 'assets/images/wetsuit2.jpg',
         description: 'Perfect for beginners and casual surfers.'
       },
-      // Add more wetsuits here
     ];
   }
 

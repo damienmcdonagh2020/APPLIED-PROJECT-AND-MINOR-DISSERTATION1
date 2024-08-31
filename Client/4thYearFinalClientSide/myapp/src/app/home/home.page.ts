@@ -18,4 +18,8 @@ export class HomePage {
     this.router.navigate(['/ireland-map']);
   }
 
+  navigateToShop() {
+    this.router.navigate(['/shop'])
+  }
+
 }
